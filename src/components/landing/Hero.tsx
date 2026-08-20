@@ -88,7 +88,7 @@ export function Hero() {
             <a href="#products">Explore Extinguishers</a>
           </Button>
           <Button size="lg" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10" asChild>
-            <Link href="/bill">Generate Bill</Link>
+            <Link href="/bill">Check Bill</Link>
           </Button>
         </motion.div>
       </div>

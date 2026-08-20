@@ -23,8 +23,8 @@ const faqs = [
     a: "We inspect pressure, seals, and expiry dates on a schedule matched to your plan, and issue compliance certificates after each visit.",
   },
   {
-    q: "Can I generate and pay a bill online?",
-    a: "Yes — head to the Bill page to generate an invoice or check the status of an existing one, with UPI payment support.",
+    q: "Can I check and pay my bill online?",
+    a: "Yes — head to the Bill page, enter your invoice number, and you'll see the status and a UPI payment option if it's still unpaid.",
   },
 ];
 

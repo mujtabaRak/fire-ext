@@ -86,22 +86,18 @@ const products = [
   },
 ];
 
-const whitelistedEmails = [{ email: "iammujtabasid@gmail.com", companyName: "Diners Fire Engineers" }];
-
 async function main() {
+  const existing = await prisma.product.count();
+  if (existing > 0) {
+    console.log(`Skipping seed — ${existing} product(s) already exist.`);
+    return;
+  }
+
   for (const product of products) {
     await prisma.product.create({ data: product });
   }
 
-  for (const w of whitelistedEmails) {
-    await prisma.whitelistedEmail.upsert({
-      where: { email: w.email },
-      update: { companyName: w.companyName, active: true },
-      create: { email: w.email, companyName: w.companyName },
-    });
-  }
-
-  console.log(`Seeded ${products.length} products and ${whitelistedEmails.length} whitelisted emails.`);
+  console.log(`Seeded ${products.length} products.`);
 }
 
 main()

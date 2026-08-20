@@ -1,18 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle2, LogOut } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatInr } from "@/lib/utils";
+import { LogoLockup } from "@/components/landing/Logo";
+import { AdminGenerateBillPanel } from "@/components/admin/AdminGenerateBillPanel";
 
 type AdminBill = {
   invoiceNumber: string;
   customerName: string;
-  customerEmail: string;
+  customerPhone: string;
   total: number;
   paymentStatus: "unpaid" | "payment_pending" | "paid";
   upiUtr: string | null;
@@ -31,6 +35,7 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [bills, setBills] = useState<AdminBill[]>([]);
   const [busyInvoice, setBusyInvoice] = useState<string | null>(null);
+  const [tab, setTab] = useState("bills");
 
   useEffect(() => {
     fetch("/api/admin/session")
@@ -45,7 +50,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (authenticated) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- loadBills also serves as a manual refresh after mark-paid
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- loadBills also serves as a manual refresh after mark-paid / new bill
       loadBills();
     }
   }, [authenticated]);
@@ -63,6 +68,12 @@ export default function AdminPage() {
       return;
     }
     setAuthenticated(true);
+  }
+
+  async function logout() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    setAuthenticated(false);
+    setPassword("");
   }
 
   async function markPaid(invoiceNumber: string) {
@@ -88,6 +99,7 @@ export default function AdminPage() {
       <main className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
         <Card className="w-full max-w-sm">
           <CardContent className="space-y-4 p-6">
+            <LogoLockup size={26} />
             <h1 className="text-lg font-semibold text-neutral-900">Admin Login</h1>
             <div>
               <Label htmlFor="admin-password">Password</Label>
@@ -113,43 +125,75 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-neutral-50 px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-4xl">
-        <h1 className="text-2xl font-bold text-neutral-900">Bills</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Verify UPI transaction references against your bank/UPI app, then mark bills paid.
-        </p>
-
-        <div className="mt-6 space-y-3">
-          {bills.map((b) => (
-            <Card key={b.invoiceNumber}>
-              <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
-                <div>
-                  <p className="font-semibold text-neutral-900">{b.invoiceNumber}</p>
-                  <p className="text-sm text-neutral-500">
-                    {b.customerName} &middot; {b.customerEmail}
-                  </p>
-                  {b.upiUtr && <p className="text-xs text-neutral-400">UTR: {b.upiUtr}</p>}
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-neutral-900">{formatInr(b.total)}</span>
-                  <Badge variant={STATUS_VARIANT[b.paymentStatus]}>
-                    {b.paymentStatus.replace("_", " ")}
-                  </Badge>
-                  {b.paymentStatus !== "paid" && (
-                    <Button
-                      size="sm"
-                      onClick={() => markPaid(b.invoiceNumber)}
-                      disabled={busyInvoice === b.invoiceNumber}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                      Mark Paid
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          {bills.length === 0 && <p className="text-sm text-neutral-500">No bills yet.</p>}
+        <div className="flex items-center justify-between">
+          <Link href="/">
+            <LogoLockup size={26} />
+          </Link>
+          <Button variant="ghost" size="sm" onClick={logout}>
+            <LogOut className="h-4 w-4" />
+            Log out
+          </Button>
         </div>
+
+        <h1 className="mt-6 text-2xl font-bold text-neutral-900">Admin Panel</h1>
+
+        <Tabs value={tab} onValueChange={setTab} className="mt-6">
+          <TabsList>
+            <TabsTrigger value="bills">Bills</TabsTrigger>
+            <TabsTrigger value="new">New Bill</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="bills">
+            <p className="mb-4 text-sm text-neutral-500">
+              Verify UPI transaction references against your bank/UPI app, then mark bills paid.
+            </p>
+            <div className="space-y-3">
+              {bills.map((b) => (
+                <Card key={b.invoiceNumber}>
+                  <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
+                    <div>
+                      <p className="font-semibold text-neutral-900">{b.invoiceNumber}</p>
+                      <p className="text-sm text-neutral-500">
+                        {b.customerName} &middot; {b.customerPhone}
+                      </p>
+                      {b.upiUtr && <p className="text-xs text-neutral-400">UTR: {b.upiUtr}</p>}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-neutral-900">{formatInr(b.total)}</span>
+                      <Badge variant={STATUS_VARIANT[b.paymentStatus]}>
+                        {b.paymentStatus.replace("_", " ")}
+                      </Badge>
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={`/api/bills/${b.invoiceNumber}/pdf`} target="_blank" rel="noreferrer">
+                          PDF
+                        </a>
+                      </Button>
+                      {b.paymentStatus !== "paid" && (
+                        <Button
+                          size="sm"
+                          onClick={() => markPaid(b.invoiceNumber)}
+                          disabled={busyInvoice === b.invoiceNumber}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          Mark Paid
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {bills.length === 0 && <p className="text-sm text-neutral-500">No bills yet.</p>}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="new">
+            <AdminGenerateBillPanel
+              onCreated={() => {
+                loadBills();
+              }}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );

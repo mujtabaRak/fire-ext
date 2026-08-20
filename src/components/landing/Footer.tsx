@@ -31,7 +31,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/bill" className="hover:text-white">
-                  Generate / Check Bill
+                  Check Bill
                 </Link>
               </li>
             </ul>

@@ -1,14 +1,5 @@
 import { z } from "zod";
 
-export const emailGateSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
-});
-
-export const otpVerifySchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
-  code: z.string().trim().regex(/^\d{6}$/, "Code must be 6 digits"),
-});
-
 export const billItemSchema = z.object({
   productId: z.string().min(1),
   quantity: z.coerce.number().int().min(1).max(1000),

@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -23,7 +23,7 @@ enum ExtinguisherType {
 }
 
 model Product {
-  id               String           @id @default(cuid())
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
   name             String
   sizeKg           Float
   type             ExtinguisherType
@@ -33,26 +33,6 @@ model Product {
   useCase          String
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
-}
-
-model WhitelistedEmail {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  companyName String
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-}
-
-model OtpRequest {
-  id        String   @id @default(cuid())
-  email     String
-  otpHash   String
-  expiresAt DateTime
-  attempts  Int      @default(0)
-  consumed  Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  @@index([email])
 }
 
 enum PaymentStatus {
@@ -66,9 +46,8 @@ enum PaymentMethod {
 }
 
 model Bill {
-  id              String        @id @default(cuid())
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
   invoiceNumber   String        @unique
-  customerEmail   String
   customerName    String
   customerPhone   String
   billingAddress  String
@@ -87,6 +66,4 @@ model Bill {
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-
-  @@index([customerEmail])
 }

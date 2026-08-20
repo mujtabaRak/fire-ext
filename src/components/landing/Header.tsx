@@ -21,7 +21,7 @@ export function Header() {
           </a>
         </nav>
         <Button asChild size="sm">
-          <Link href="/bill">Generate Bill</Link>
+          <Link href="/bill">Check Bill</Link>
         </Button>
       </div>
     </header>

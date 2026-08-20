@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { getVerifiedBillSessionEmail } from "@/lib/auth";
+import { isAdminAuthenticated } from "@/lib/auth";
 import { generateBillSchema } from "@/lib/validations";
 import { generateInvoiceNumber } from "@/lib/invoice";
 
 export async function POST(request: Request) {
-  const email = await getVerifiedBillSessionEmail();
-  if (!email) {
-    return NextResponse.json(
-      { error: "Your session has expired. Please verify your email again." },
-      { status: 401 }
-    );
+  const authenticated = await isAdminAuthenticated();
+  if (!authenticated) {
+    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -57,7 +54,6 @@ export async function POST(request: Request) {
       const bill = await prisma.bill.create({
         data: {
           invoiceNumber,
-          customerEmail: email,
           customerName: data.customerName,
           customerPhone: data.customerPhone,
           billingAddress: data.billingAddress,

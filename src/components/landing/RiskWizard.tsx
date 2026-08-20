@@ -156,9 +156,6 @@ export function RiskWizard({ products }: { products: ProductDto[] }) {
               </p>
               <p className="mt-3 text-2xl font-bold text-neutral-900">{formatInr(result.price)}</p>
               <div className="mt-6 flex gap-2">
-                <Button asChild>
-                  <a href="/bill">Generate Bill</a>
-                </Button>
                 <Button variant="outline" onClick={reset}>
                   <RotateCcw className="h-4 w-4" />
                   Retake

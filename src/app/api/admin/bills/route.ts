@@ -17,7 +17,7 @@ export async function GET() {
     bills.map((b) => ({
       invoiceNumber: b.invoiceNumber,
       customerName: b.customerName,
-      customerEmail: b.customerEmail,
+      customerPhone: b.customerPhone,
       total: b.total,
       paymentStatus: b.paymentStatus,
       upiUtr: b.upiUtr,
