@@ -72,9 +72,9 @@ export function RiskWizard({ products }: { products: ProductDto[] }) {
   }
 
   return (
-    <Card className="border-orange-200 bg-orange-50/40">
+    <Card className="border-red-200 bg-red-50/40">
       <CardContent className="p-8">
-        <div className="mb-6 flex items-center gap-2 text-orange-700">
+        <div className="mb-6 flex items-center gap-2 text-red-700">
           <Sparkles className="h-5 w-5" />
           <h3 className="font-semibold">Fire Risk Wizard</h3>
         </div>
@@ -91,7 +91,7 @@ export function RiskWizard({ products }: { products: ProductDto[] }) {
                       setPlace(o.value);
                       setStep(1);
                     }}
-                    className="rounded-lg border border-neutral-200 bg-white px-3 py-3 text-sm font-medium text-neutral-700 hover:border-orange-400 hover:text-orange-700"
+                    className="rounded-lg border border-neutral-200 bg-white px-3 py-3 text-sm font-medium text-neutral-700 hover:border-red-400 hover:text-red-700"
                   >
                     {o.label}
                   </button>
@@ -111,7 +111,7 @@ export function RiskWizard({ products }: { products: ProductDto[] }) {
                       setSqft(o.value);
                       setStep(2);
                     }}
-                    className="rounded-lg border border-neutral-200 bg-white px-3 py-3 text-sm font-medium text-neutral-700 hover:border-orange-400 hover:text-orange-700"
+                    className="rounded-lg border border-neutral-200 bg-white px-3 py-3 text-sm font-medium text-neutral-700 hover:border-red-400 hover:text-red-700"
                   >
                     {o.label}
                   </button>
@@ -131,7 +131,7 @@ export function RiskWizard({ products }: { products: ProductDto[] }) {
                       setHazard(o.value);
                       setStep(3);
                     }}
-                    className="rounded-lg border border-neutral-200 bg-white px-3 py-3 text-left text-sm font-medium text-neutral-700 hover:border-orange-400 hover:text-orange-700"
+                    className="rounded-lg border border-neutral-200 bg-white px-3 py-3 text-left text-sm font-medium text-neutral-700 hover:border-red-400 hover:text-red-700"
                   >
                     {o.label}
                   </button>
@@ -142,7 +142,7 @@ export function RiskWizard({ products }: { products: ProductDto[] }) {
 
           {step === 3 && result && (
             <motion.div key="s3" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}>
-              <p className="text-xs font-medium uppercase tracking-wide text-orange-600">
+              <p className="text-xs font-medium uppercase tracking-wide text-red-600">
                 Recommended for {PLACE_OPTIONS.find((p) => p.value === place)?.label}
               </p>
               <h4 className="mt-2 text-xl font-bold text-neutral-900">{result.name}</h4>

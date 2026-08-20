@@ -20,9 +20,9 @@ function getTransport() {
 
 export async function sendOtpEmail(email: string, code: string) {
   const transport = getTransport();
-  const from = process.env.SMTP_FROM ?? "FireGuard Billing <billing@fireguard.example>";
+  const from = process.env.SMTP_FROM ?? "Diners Fire Engineers Billing <billing@dinersfireengineers.example>";
 
-  const subject = "Your FireGuard bill generation code";
+  const subject = "Your Diners Fire Engineers bill generation code";
   const text = `Your one-time code is ${code}. It expires in 10 minutes. Do not share this code with anyone.`;
   const html = `<p>Your one-time code is <strong style="font-size:20px">${code}</strong>.</p><p>It expires in 10 minutes. Do not share this code with anyone.</p>`;
 

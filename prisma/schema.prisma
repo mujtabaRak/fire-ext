@@ -17,7 +17,7 @@ enum FireClass {
 enum ExtinguisherType {
   ABC
   CO2
-  WATER
+  HCFC_123
   FOAM
   WET_CHEMICAL
 }

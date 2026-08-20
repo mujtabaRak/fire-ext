@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FireGuard Extinguishers — Fire Safety Equipment & AMC",
+  title: "Diners Fire Engineers — Fire Extinguishers & AMC",
   description:
     "Fire extinguishers, installation, and annual maintenance for homes, offices, and industrial sites across India.",
 };

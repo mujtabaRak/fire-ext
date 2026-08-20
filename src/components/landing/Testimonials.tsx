@@ -1,23 +1,23 @@
-import { Star } from "lucide-react";
+import { Truck, ClipboardCheck, Headset } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-const testimonials = [
+const reasons = [
   {
-    name: "Ravi Kumar",
-    role: "Facility Manager, Textile Unit",
-    quote:
-      "Their AMC team never misses a refill deadline. Compliance audits have been stress-free since we switched.",
+    icon: Truck,
+    title: "Fast, Free Delivery",
+    description:
+      "Free collection and delivery within 72 hours, straight to your home, office, or site.",
   },
   {
-    name: "Anita Sharma",
-    role: "Restaurant Owner",
-    quote:
-      "The wet chemical extinguisher for our kitchen was the right call — the team explained exactly why over ABC.",
+    icon: ClipboardCheck,
+    title: "Right Extinguisher, Every Time",
+    description:
+      "We match the type and size to your actual fire risk — Dry Chemical, CO2, HCFC-123, Foam, or Class K.",
   },
   {
-    name: "Suresh Iyer",
-    role: "IT Admin, Data Center",
-    quote: "CO2 units installed same week, with proper signage and staff training included.",
+    icon: Headset,
+    title: "Payment On Your Terms",
+    description: "Pay immediately after delivery, in any mode — UPI, cash, or card.",
   },
 ];
 
@@ -26,22 +26,17 @@ export function Testimonials() {
     <section className="bg-white py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2 className="text-center text-3xl font-bold text-neutral-900 sm:text-4xl">
-          Trusted by Businesses Like Yours
+          Why Diners Fire Engineers
         </h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
-          {testimonials.map((t) => (
-            <Card key={t.name}>
+          {reasons.map((r) => (
+            <Card key={r.title}>
               <CardContent className="p-6">
-                <div className="flex gap-0.5 text-orange-500">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
-                  ))}
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-700">
+                  <r.icon className="h-5 w-5" />
                 </div>
-                <p className="mt-4 text-sm text-neutral-600">&ldquo;{t.quote}&rdquo;</p>
-                <div className="mt-4">
-                  <p className="text-sm font-semibold text-neutral-900">{t.name}</p>
-                  <p className="text-xs text-neutral-500">{t.role}</p>
-                </div>
+                <h3 className="mt-4 font-semibold text-neutral-900">{r.title}</h3>
+                <p className="mt-2 text-sm text-neutral-600">{r.description}</p>
               </CardContent>
             </Card>
           ))}

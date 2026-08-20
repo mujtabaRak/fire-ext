@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { Plus, Trash2, ShieldCheck, Mail } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import type { ProductDto } from "@/lib/types";
+import { EXTINGUISHER_TYPE_LABELS } from "@/lib/types";
 import { formatInr } from "@/lib/utils";
 import { UpiPayBlock } from "./UpiPayBlock";
+import { BillStepper } from "./BillStepper";
 
 type Step = "email" | "otp" | "form" | "done";
 
@@ -40,6 +43,16 @@ export function GenerateBillPanel({ products }: { products: ProductDto[] }) {
   );
 
   const productMap = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
+
+  const productsByType = useMemo(() => {
+    const groups = new Map<string, ProductDto[]>();
+    for (const p of products) {
+      const list = groups.get(p.type) ?? [];
+      list.push(p);
+      groups.set(p.type, list);
+    }
+    return groups;
+  }, [products]);
 
   const subtotal = items.reduce((sum, item) => {
     const product = productMap.get(item.productId);
@@ -138,12 +151,14 @@ export function GenerateBillPanel({ products }: { products: ProductDto[] }) {
     }
   }
 
+  let content: ReactNode = null;
+
   if (step === "email") {
-    return (
+    content = (
       <Card>
         <CardContent className="space-y-4 p-6">
           <div className="flex items-center gap-2 text-neutral-900">
-            <Mail className="h-5 w-5 text-orange-600" />
+            <Mail className="h-5 w-5 text-red-600" />
             <h3 className="font-semibold">Verify your email to generate a bill</h3>
           </div>
           <p className="text-sm text-neutral-500">
@@ -167,14 +182,12 @@ export function GenerateBillPanel({ products }: { products: ProductDto[] }) {
         </CardContent>
       </Card>
     );
-  }
-
-  if (step === "otp") {
-    return (
+  } else if (step === "otp") {
+    content = (
       <Card>
         <CardContent className="space-y-4 p-6">
           <div className="flex items-center gap-2 text-neutral-900">
-            <ShieldCheck className="h-5 w-5 text-orange-600" />
+            <ShieldCheck className="h-5 w-5 text-red-600" />
             <h3 className="font-semibold">Enter the 6-digit code</h3>
           </div>
           <p className="text-sm text-neutral-500">Sent to {email}. It expires in 10 minutes.</p>
@@ -200,10 +213,8 @@ export function GenerateBillPanel({ products }: { products: ProductDto[] }) {
         </CardContent>
       </Card>
     );
-  }
-
-  if (step === "form") {
-    return (
+  } else if (step === "form") {
+    content = (
       <Card>
         <CardContent className="space-y-6 p-6">
           <h3 className="font-semibold text-neutral-900">Bill Details</h3>
@@ -253,10 +264,14 @@ export function GenerateBillPanel({ products }: { products: ProductDto[] }) {
                     value={item.productId}
                     onChange={(e) => updateItem(i, { productId: e.target.value })}
                   >
-                    {products.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.sizeKg}kg) — {formatInr(p.price)}
-                      </option>
+                    {[...productsByType.entries()].map(([type, typeProducts]) => (
+                      <optgroup key={type} label={EXTINGUISHER_TYPE_LABELS[type as ProductDto["type"]]}>
+                        {typeProducts.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name} — {formatInr(p.price)}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                   <Input
@@ -320,10 +335,8 @@ export function GenerateBillPanel({ products }: { products: ProductDto[] }) {
         </CardContent>
       </Card>
     );
-  }
-
-  if (step === "done" && result) {
-    return (
+  } else if (step === "done" && result) {
+    content = (
       <Card>
         <CardContent className="space-y-5 p-6">
           <div>
@@ -344,5 +357,10 @@ export function GenerateBillPanel({ products }: { products: ProductDto[] }) {
     );
   }
 
-  return null;
+  return (
+    <div className="space-y-6">
+      <BillStepper current={step} />
+      {content}
+    </div>
+  );
 }

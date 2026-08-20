@@ -58,7 +58,7 @@ export function UpiPayBlock({
     <div className="rounded-xl border border-neutral-200 p-5">
       <div className="flex items-center justify-between">
         <h4 className="flex items-center gap-2 font-semibold text-neutral-900">
-          <Smartphone className="h-4 w-4 text-orange-600" />
+          <Smartphone className="h-4 w-4 text-red-600" />
           Pay via UPI
         </h4>
         {paymentStatus === "payment_pending" && (

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Ruler, Tag, Flame } from "lucide-react";
 import type { ProductDto } from "@/lib/types";
-import { EXTINGUISHER_TYPE_LABELS } from "@/lib/types";
+import { EXTINGUISHER_TYPE_LABELS, EXTINGUISHER_TYPE_SHORT_LABELS } from "@/lib/types";
 import { formatInr } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,11 +70,11 @@ export function ProductShowcase({ products }: { products: ProductDto[] }) {
                     onClick={() => setSelectedId(p.id)}
                     className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                       p.id === selected.id
-                        ? "bg-orange-600 text-white"
+                        ? "bg-red-600 text-white"
                         : "bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200"
                     }`}
                   >
-                    {p.sizeKg}kg
+                    {p.sizeKg}kg <span className="opacity-70">&middot; {EXTINGUISHER_TYPE_SHORT_LABELS[p.type]}</span>
                   </button>
                 ))}
               </div>
@@ -94,21 +94,21 @@ export function ProductShowcase({ products }: { products: ProductDto[] }) {
                   </div>
                   <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
                     <div className="flex flex-col items-center gap-1 text-center">
-                      <Ruler className="h-4 w-4 text-orange-600" />
+                      <Ruler className="h-4 w-4 text-red-600" />
                       <span className="font-semibold text-neutral-900">
                         {selected.coverageAreaSqFt} sq ft
                       </span>
                       <span className="text-neutral-500">coverage</span>
                     </div>
                     <div className="flex flex-col items-center gap-1 text-center">
-                      <Flame className="h-4 w-4 text-orange-600" />
+                      <Flame className="h-4 w-4 text-red-600" />
                       <span className="font-semibold text-neutral-900">
                         Class {selected.fireClasses.join(", ")}
                       </span>
                       <span className="text-neutral-500">fire rating</span>
                     </div>
                     <div className="flex flex-col items-center gap-1 text-center">
-                      <Tag className="h-4 w-4 text-orange-600" />
+                      <Tag className="h-4 w-4 text-red-600" />
                       <span className="font-semibold text-neutral-900">
                         {formatInr(selected.price)}
                       </span>

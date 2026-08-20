@@ -6,7 +6,7 @@ import type { ExtinguisherType } from "@/lib/types";
 const TYPE_COLORS: Record<ExtinguisherType, string> = {
   ABC: "#dc2626",
   CO2: "#171717",
-  WATER: "#2563eb",
+  HCFC_123: "#7c3aed",
   FOAM: "#0891b2",
   WET_CHEMICAL: "#d97706",
 };

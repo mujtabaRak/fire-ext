@@ -28,7 +28,7 @@ export function HowItWorks() {
         <div className="mt-12 grid gap-8 sm:grid-cols-3">
           {steps.map((s, i) => (
             <div key={s.title} className="relative text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-orange-700">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-red-700">
                 <s.icon className="h-7 w-7" />
               </div>
               <div className="mx-auto mt-4 flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">

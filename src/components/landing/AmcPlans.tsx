@@ -30,14 +30,15 @@ export function AmcPlans() {
             Annual Maintenance Plans
           </h2>
           <p className="mt-3 text-neutral-500">
-            Keep every extinguisher compliant and ready, year-round.
+            Keep every extinguisher compliant and ready, year-round. Indicative pricing — talk to
+            sales for an exact quote.
           </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {plans.map((plan) => (
             <Card
               key={plan.name}
-              className={plan.highlighted ? "border-orange-400 shadow-md ring-1 ring-orange-200" : ""}
+              className={plan.highlighted ? "border-red-400 shadow-md ring-1 ring-red-200" : ""}
             >
               <CardHeader>
                 <CardTitle>{plan.name}</CardTitle>
@@ -47,7 +48,7 @@ export function AmcPlans() {
                 <ul className="space-y-2 text-sm text-neutral-600">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-600" />
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
                       {f}
                     </li>
                   ))}
