@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Reveal } from "./Reveal";
 
 const faqs = [
   {
@@ -32,17 +33,21 @@ export function Faq() {
   return (
     <section id="faq" className="bg-neutral-50 py-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
-        <h2 className="text-center text-3xl font-bold text-neutral-900 sm:text-4xl">
-          Frequently Asked Questions
-        </h2>
-        <Accordion type="single" collapsible className="mt-10">
-          {faqs.map((f) => (
-            <AccordionItem key={f.q} value={f.q}>
-              <AccordionTrigger>{f.q}</AccordionTrigger>
-              <AccordionContent>{f.a}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <Reveal>
+          <h2 className="text-center text-3xl font-bold text-neutral-900 sm:text-4xl">
+            Frequently Asked Questions
+          </h2>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <Accordion type="single" collapsible className="mt-10">
+            {faqs.map((f) => (
+              <AccordionItem key={f.q} value={f.q}>
+                <AccordionTrigger className="hover:text-red-600">{f.q}</AccordionTrigger>
+                <AccordionContent>{f.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </Reveal>
       </div>
     </section>
   );

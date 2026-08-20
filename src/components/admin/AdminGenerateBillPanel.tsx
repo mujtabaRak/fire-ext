@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, RotateCcw } from "lucide-react";
+import { Plus, Trash2, RotateCcw, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ const emptyItem = (products: ProductDto[]): LineItemDraft => ({
 
 export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }) {
   const [products, setProducts] = useState<ProductDto[]>([]);
+  const [productsLoaded, setProductsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +45,8 @@ export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }
       .then((r) => r.json())
       .then((data: ProductDto[]) => {
         setProducts(data);
-        setItems([emptyItem(data)]);
+        setItems(data.length > 0 ? [emptyItem(data)] : []);
+        setProductsLoaded(true);
       });
   }, []);
 
@@ -197,6 +199,17 @@ export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }
           </div>
         )}
 
+        {productsLoaded && products.length === 0 && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              No products found in the catalog. Run the seed script (
+              <code className="rounded bg-amber-100 px-1">npm run db:seed</code>) against this
+              environment&apos;s database before generating a bill.
+            </span>
+          </div>
+        )}
+
         <div className="space-y-3">
           <Label>Line Items</Label>
           {items.map((item, i) => {
@@ -278,7 +291,8 @@ export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }
             !customerPhone ||
             !billingAddress ||
             (!sameAsBilling && !shippingAddress) ||
-            items.length === 0
+            items.length === 0 ||
+            items.some((item) => !item.productId)
           }
         >
           {loading ? "Generating…" : "Generate Bill"}

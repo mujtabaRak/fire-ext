@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExtinguisherIllustration, HumanSilhouette } from "./ExtinguisherIllustration";
 import { RiskWizard } from "./RiskWizard";
+import { Reveal } from "./Reveal";
 
 const REFERENCE_HEIGHT_PX = 220;
 
@@ -31,21 +32,31 @@ export function ProductShowcase({ products }: { products: ProductDto[] }) {
   return (
     <section id="products" className="bg-neutral-50 py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-neutral-900 sm:text-4xl">
-            Find the Right Size, Visually
-          </h2>
-          <p className="mt-3 text-neutral-500">
-            Tap a size below to compare it against an average adult for scale, and see exactly
-            what it&apos;s rated to handle.
-          </p>
-        </div>
+        <Reveal>
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold text-neutral-900 sm:text-4xl">
+              Find the Right Size, Visually
+            </h2>
+            <p className="mt-3 text-neutral-500">
+              Tap a size below to compare it against an average adult for scale, and see exactly
+              what it&apos;s rated to handle.
+            </p>
+          </div>
+        </Reveal>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_1fr]">
           {/* Visual comparison panel */}
-          <Card className="overflow-hidden">
+          <Reveal delay={0.1}>
+          <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
             <CardContent className="p-8">
-              <div className="flex items-end justify-center gap-10 border-b border-dashed border-neutral-200 pb-6">
+              <div
+                className="flex items-end justify-center gap-10 rounded-xl border-b border-dashed border-neutral-200 pb-6"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle, #e5e5e5 1px, transparent 1px)",
+                  backgroundSize: "16px 16px",
+                }}
+              >
                 <HumanSilhouette heightPx={REFERENCE_HEIGHT_PX} />
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -68,9 +79,9 @@ export function ProductShowcase({ products }: { products: ProductDto[] }) {
                   <button
                     key={p.id}
                     onClick={() => setSelectedId(p.id)}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-150 hover:scale-105 active:scale-95 ${
                       p.id === selected.id
-                        ? "bg-red-600 text-white"
+                        ? "bg-red-600 text-white shadow-sm"
                         : "bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200"
                     }`}
                   >
@@ -122,9 +133,12 @@ export function ProductShowcase({ products }: { products: ProductDto[] }) {
               </AnimatePresence>
             </CardContent>
           </Card>
+          </Reveal>
 
           {/* Risk wizard */}
-          <RiskWizard products={sorted} />
+          <Reveal delay={0.2}>
+            <RiskWizard products={sorted} />
+          </Reveal>
         </div>
       </div>
     </section>
