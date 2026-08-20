@@ -1,0 +1,92 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum FireClass {
+  A
+  B
+  C
+  K
+}
+
+enum ExtinguisherType {
+  ABC
+  CO2
+  WATER
+  FOAM
+  WET_CHEMICAL
+}
+
+model Product {
+  id               String           @id @default(cuid())
+  name             String
+  sizeKg           Float
+  type             ExtinguisherType
+  coverageAreaSqFt Int
+  fireClasses      String
+  price            Float
+  useCase          String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model WhitelistedEmail {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  companyName String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model OtpRequest {
+  id        String   @id @default(cuid())
+  email     String
+  otpHash   String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+enum PaymentStatus {
+  unpaid
+  payment_pending
+  paid
+}
+
+enum PaymentMethod {
+  upi_manual
+}
+
+model Bill {
+  id              String        @id @default(cuid())
+  invoiceNumber   String        @unique
+  customerEmail   String
+  customerName    String
+  customerPhone   String
+  billingAddress  String
+  shippingAddress String
+  items           String
+  taxRate         Float         @default(0)
+  discount        Float         @default(0)
+  subtotal        Float
+  total           Float
+  notes           String?
+  invoiceDate     DateTime      @default(now())
+  dueDate         DateTime?
+  paymentStatus   PaymentStatus @default(unpaid)
+  paymentMethod   PaymentMethod @default(upi_manual)
+  upiUtr          String?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([customerEmail])
+}
