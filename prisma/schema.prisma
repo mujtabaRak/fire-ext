@@ -1,5 +1,5 @@
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -23,7 +23,7 @@ enum ExtinguisherType {
 }
 
 model Product {
-  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  id               String           @id @default(cuid())
   name             String
   sizeKg           Float
   type             ExtinguisherType
@@ -46,7 +46,7 @@ enum PaymentMethod {
 }
 
 model Bill {
-  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  id              String        @id @default(cuid())
   invoiceNumber   String        @unique
   customerName    String
   customerPhone   String
