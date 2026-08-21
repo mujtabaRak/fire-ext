@@ -39,3 +39,16 @@ export const adminLoginSchema = z.object({
 export const adminMarkPaidSchema = z.object({
   invoiceNumber: z.string().trim().min(3).max(40),
 });
+
+export const productSchema = z.object({
+  name: z.string().trim().min(2).max(200),
+  type: z.enum(["ABC", "CO2", "HCFC_123", "FOAM", "WET_CHEMICAL"]),
+  sizeKg: z.coerce.number().positive().max(1000),
+  price: z.coerce.number().min(0),
+  coverageAreaSqFt: z.coerce.number().int().positive().max(1000000),
+  fireClasses: z.array(z.enum(["A", "B", "C", "K"])).min(1, "Select at least one fire class"),
+  useCase: z.string().trim().min(2).max(300),
+  active: z.boolean().optional(),
+});
+
+export const productUpdateSchema = productSchema.partial();

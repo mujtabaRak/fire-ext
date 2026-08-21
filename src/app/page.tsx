@@ -13,7 +13,10 @@ import { Footer } from "@/components/landing/Footer";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const products = await prisma.product.findMany({ orderBy: { sizeKg: "asc" } });
+  const products = await prisma.product.findMany({
+    where: { active: true },
+    orderBy: { sizeKg: "asc" },
+  });
   const productDtos: ProductDto[] = products.map((p) => ({
     id: p.id,
     name: p.name,

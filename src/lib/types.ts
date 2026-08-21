@@ -11,6 +11,20 @@ export type ProductDto = {
   useCase: string;
 };
 
+export type AdminProductDto = ProductDto & { active: boolean };
+
+export type FireClassValue = "A" | "B" | "C" | "K";
+
+export const FIRE_CLASS_VALUES: FireClassValue[] = ["A", "B", "C", "K"];
+
+export const EXTINGUISHER_TYPE_VALUES: ExtinguisherType[] = [
+  "ABC",
+  "CO2",
+  "HCFC_123",
+  "FOAM",
+  "WET_CHEMICAL",
+];
+
 export const EXTINGUISHER_TYPE_LABELS: Record<ExtinguisherType, string> = {
   ABC: "Dry Chemical Powder",
   CO2: "CO2",

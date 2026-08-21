@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatInr } from "@/lib/utils";
 import { LogoLockup } from "@/components/landing/Logo";
 import { AdminGenerateBillPanel } from "@/components/admin/AdminGenerateBillPanel";
+import { AdminProductsPanel } from "@/components/admin/AdminProductsPanel";
 
 type AdminBill = {
   invoiceNumber: string;
@@ -141,6 +142,7 @@ export default function AdminPage() {
           <TabsList>
             <TabsTrigger value="bills">Bills</TabsTrigger>
             <TabsTrigger value="new">New Bill</TabsTrigger>
+            <TabsTrigger value="products">Products</TabsTrigger>
           </TabsList>
 
           <TabsContent value="bills">
@@ -192,6 +194,10 @@ export default function AdminPage() {
                 loadBills();
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="products">
+            <AdminProductsPanel />
           </TabsContent>
         </Tabs>
       </div>
