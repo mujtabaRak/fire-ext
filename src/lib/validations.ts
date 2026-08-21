@@ -52,3 +52,24 @@ export const productSchema = z.object({
 });
 
 export const productUpdateSchema = productSchema.partial();
+
+export const certificateItemSchema = z.object({
+  description: z.string().trim().min(2).max(200),
+  yearOfManufacturing: z.coerce
+    .number()
+    .int()
+    .min(2000)
+    .max(2100),
+  qty: z.coerce.number().int().min(1).max(1000),
+  refillingDueDate: z.string().min(1, "Refilling due date is required"),
+  cylinderSerialNo: z.string().trim().min(1).max(60),
+});
+
+export const generateCertificateSchema = z.object({
+  clientName: z.string().trim().min(2).max(200),
+  clientAddress: z.string().trim().min(5).max(500),
+  saleDate: z.string().min(1, "Sale date is required"),
+  warrantyPeriod: z.string().trim().min(1).max(100).default("One year"),
+  testingNote: z.string().trim().max(1000).optional(),
+  items: z.array(certificateItemSchema).min(1, "Add at least one item"),
+});

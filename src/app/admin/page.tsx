@@ -13,6 +13,7 @@ import { formatInr } from "@/lib/utils";
 import { LogoLockup } from "@/components/landing/Logo";
 import { AdminGenerateBillPanel } from "@/components/admin/AdminGenerateBillPanel";
 import { AdminProductsPanel } from "@/components/admin/AdminProductsPanel";
+import { AdminCertificatesPanel } from "@/components/admin/AdminCertificatesPanel";
 
 type AdminBill = {
   invoiceNumber: string;
@@ -142,6 +143,7 @@ export default function AdminPage() {
           <TabsList>
             <TabsTrigger value="bills">Bills</TabsTrigger>
             <TabsTrigger value="new">New Bill</TabsTrigger>
+            <TabsTrigger value="certificates">Certificates</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
           </TabsList>
 
@@ -194,6 +196,10 @@ export default function AdminPage() {
                 loadBills();
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="certificates">
+            <AdminCertificatesPanel />
           </TabsContent>
 
           <TabsContent value="products">

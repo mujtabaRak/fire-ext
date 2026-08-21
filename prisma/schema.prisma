@@ -46,6 +46,19 @@ enum PaymentMethod {
   upi_manual
 }
 
+model Certificate {
+  id                String   @id @default(cuid())
+  certificateNumber String   @unique
+  clientName        String
+  clientAddress     String
+  saleDate          DateTime
+  warrantyPeriod    String   @default("One year")
+  testingNote       String?
+  items             String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 model Bill {
   id              String        @id @default(cuid())
   invoiceNumber   String        @unique
