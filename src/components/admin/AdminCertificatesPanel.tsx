@@ -111,21 +111,32 @@ export function AdminCertificatesPanel() {
     setItems((prev) => prev.filter((_, i) => i !== index));
   }
 
-  const formValid =
-    clientName.trim().length >= 2 &&
-    clientAddress.trim().length >= 5 &&
-    saleDate.length > 0 &&
-    items.length > 0 &&
-    items.every(
-      (it) =>
-        it.description.trim().length >= 2 &&
-        Number(it.yearOfManufacturing) >= 2000 &&
-        Number(it.qty) >= 1 &&
-        it.refillingDueDate.length > 0 &&
-        it.cylinderSerialNo.trim().length >= 1
-    );
+  function findValidationError(): string | null {
+    if (clientName.trim().length < 2) return "Enter the client name.";
+    if (clientAddress.trim().length < 5) return "Enter the client address.";
+    if (!saleDate) return "Enter the sale/supply date.";
+    if (items.length === 0) return "Add at least one item.";
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      const label = items.length > 1 ? `Item ${i + 1}: ` : "";
+      if (it.description.trim().length < 2) return `${label}enter a description.`;
+      if (!Number.isFinite(Number(it.yearOfManufacturing)) || Number(it.yearOfManufacturing) < 2000)
+        return `${label}enter a valid year of manufacturing.`;
+      if (!Number.isFinite(Number(it.qty)) || Number(it.qty) < 1)
+        return `${label}enter a valid quantity.`;
+      if (!it.refillingDueDate) return `${label}enter the refilling due date.`;
+      if (it.cylinderSerialNo.trim().length < 1) return `${label}enter the cylinder serial number.`;
+    }
+    return null;
+  }
 
   async function submit() {
+    const validationError = findValidationError();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     setError(null);
     setSaving(true);
     try {
@@ -342,7 +353,7 @@ export function AdminCertificatesPanel() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button onClick={submit} disabled={saving || !formValid}>
+          <Button onClick={submit} disabled={saving}>
             {saving ? "Generating…" : "Generate Certificate"}
           </Button>
         </CardContent>
