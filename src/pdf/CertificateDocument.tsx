@@ -1,5 +1,11 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { PdfLogo } from "./PdfLogo";
+import {
+  PAGE_BORDER,
+  PdfLetterheadHeader,
+  PdfWatermark,
+  PdfFooterBar,
+  PdfCornerRibbonTop,
+} from "./PdfBranding";
 
 export type PdfCertificateItem = {
   description: string;
@@ -21,20 +27,11 @@ export type PdfCertificateData = {
 };
 
 const styles = StyleSheet.create({
-  page: { padding: 40, fontSize: 10, fontFamily: "Helvetica", color: "#171717" },
+  page: { fontSize: 10, fontFamily: "Helvetica", color: "#171717", ...PAGE_BORDER },
+  content: { padding: 32, paddingBottom: 90 },
 
   topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
-  meta: { fontSize: 8, color: "#a3a3a3", textAlign: "right" },
-
-  headerCenter: { alignItems: "center", marginTop: -8, marginBottom: 20 },
-  headerRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  companyName: { fontSize: 20, fontWeight: 700, color: "#dc2626" },
-  docTitle: {
-    fontSize: 16,
-    fontWeight: 700,
-    marginTop: 10,
-    textDecoration: "underline",
-  },
+  meta: { fontSize: 8, color: "#a3a3a3" },
   reportNo: { fontSize: 9, color: "#525252", marginTop: 4, textDecoration: "underline" },
 
   dateRow: { marginTop: 14, marginBottom: 14, textAlign: "right" },
@@ -72,91 +69,81 @@ const styles = StyleSheet.create({
   signatureFor: { marginBottom: 40, fontWeight: 700 },
   signatureLine: { borderTop: "1px solid #a3a3a3", width: "100%", marginBottom: 4 },
   signatureCaption: { fontSize: 8, color: "#737373" },
-
-  footer: {
-    position: "absolute",
-    bottom: 30,
-    left: 40,
-    right: 40,
-    textAlign: "center",
-    fontSize: 9,
-    color: "#a3a3a3",
-  },
 });
 
 export function CertificateDocument({ cert }: { cert: PdfCertificateData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={styles.topRow}>
-          <View />
-          <Text style={styles.meta}>Certificate No: {cert.certificateNumber}</Text>
-        </View>
+        <PdfWatermark />
+        <PdfCornerRibbonTop />
 
-        <View style={styles.headerCenter}>
-          <View style={styles.headerRow}>
-            <PdfLogo />
-            <Text style={styles.companyName}>DINERS FIRE ENGINEERS</Text>
+        <View style={styles.content}>
+          <View style={styles.topRow}>
+            <Text style={styles.meta}>Certificate No: {cert.certificateNumber}</Text>
           </View>
-          <Text style={styles.docTitle}>CERTIFICATE</Text>
-          <Text style={styles.reportNo}>Report No. {cert.certificateNumber}</Text>
-        </View>
 
-        <View style={styles.dateRow}>
-          <Text>
-            <Text style={styles.label}>Date: </Text>
-            {cert.certificateDate}
+          <PdfLetterheadHeader
+            docTitle="CERTIFICATE"
+            docSubtitle={`Report No. ${cert.certificateNumber}`}
+          />
+
+          <View style={styles.dateRow}>
+            <Text>
+              <Text style={styles.label}>Date: </Text>
+              {cert.certificateDate}
+            </Text>
+          </View>
+
+          <View style={styles.clientBlock}>
+            <Text style={styles.clientLabel}>Client Name: {cert.clientName}</Text>
+            <Text>Address: {cert.clientAddress}</Text>
+          </View>
+
+          <Text style={styles.statement}>
+            This is certified that the under-noted fire extinguisher(s) have been supplied by us
+            and are warranted for a period of {cert.warrantyPeriod} from the date of sale.
           </Text>
-        </View>
 
-        <View style={styles.clientBlock}>
-          <Text style={styles.clientLabel}>Client Name: {cert.clientName}</Text>
-          <Text>Address: {cert.clientAddress}</Text>
-        </View>
-
-        <Text style={styles.statement}>
-          This is certified that the under-noted fire extinguisher(s) have been supplied by us
-          and are warranted for a period of {cert.warrantyPeriod} from the date of sale.
-        </Text>
-
-        <View style={styles.table}>
-          <View style={styles.tableHeader}>
-            <Text style={[styles.colSNo, styles.headerCell]}>SR.NO.</Text>
-            <Text style={[styles.colDesc, styles.headerCell]}>DESCRIPTION</Text>
-            <Text style={[styles.colYear, styles.headerCell]}>YEAR OF MANUFACTURING</Text>
-            <Text style={[styles.colQty, styles.headerCell]}>QTY</Text>
-            <Text style={[styles.colRefill, styles.headerCell]}>REFILLING DUE DATE</Text>
-            <Text style={[styles.colSerial, styles.headerCell]}>CYLINDER SR. NO.</Text>
-          </View>
-          {cert.items.map((item, i) => (
-            <View style={styles.tableRow} key={i}>
-              <Text style={styles.colSNo}>{i + 1}</Text>
-              <Text style={styles.colDesc}>{item.description}</Text>
-              <Text style={styles.colYear}>{item.yearOfManufacturing}</Text>
-              <Text style={styles.colQty}>{item.qty}</Text>
-              <Text style={styles.colRefill}>{item.refillingDueDate}</Text>
-              <Text style={styles.colSerial}>{item.cylinderSerialNo}</Text>
+          <View style={styles.table}>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.colSNo, styles.headerCell]}>SR.NO.</Text>
+              <Text style={[styles.colDesc, styles.headerCell]}>DESCRIPTION</Text>
+              <Text style={[styles.colYear, styles.headerCell]}>YEAR OF MANUFACTURING</Text>
+              <Text style={[styles.colQty, styles.headerCell]}>QTY</Text>
+              <Text style={[styles.colRefill, styles.headerCell]}>REFILLING DUE DATE</Text>
+              <Text style={[styles.colSerial, styles.headerCell]}>CYLINDER SR. NO.</Text>
             </View>
-          ))}
-        </View>
+            {cert.items.map((item, i) => (
+              <View style={styles.tableRow} key={i}>
+                <Text style={styles.colSNo}>{i + 1}</Text>
+                <Text style={styles.colDesc}>{item.description}</Text>
+                <Text style={styles.colYear}>{item.yearOfManufacturing}</Text>
+                <Text style={styles.colQty}>{item.qty}</Text>
+                <Text style={styles.colRefill}>{item.refillingDueDate}</Text>
+                <Text style={styles.colSerial}>{item.cylinderSerialNo}</Text>
+              </View>
+            ))}
+          </View>
 
-        <Text style={styles.statement}>
-          The above said fire extinguisher(s) have been supplied to the client on dated:{" "}
-          {cert.saleDate}.
-        </Text>
+          <Text style={styles.statement}>
+            The above said fire extinguisher(s) have been supplied to the client on dated:{" "}
+            {cert.saleDate}.
+          </Text>
 
-        {cert.testingNote && <Text style={styles.statement}>{cert.testingNote}</Text>}
+          {cert.testingNote && <Text style={styles.statement}>{cert.testingNote}</Text>}
 
-        <View style={styles.bottomRow}>
-          <View />
-          <View style={styles.signatureBlock}>
-            <Text style={styles.signatureFor}>For: DINERS FIRE ENGINEERS</Text>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureCaption}>Authorised Signature</Text>
+          <View style={styles.bottomRow}>
+            <View />
+            <View style={styles.signatureBlock}>
+              <Text style={styles.signatureFor}>For: DINERS FIRE ENGINEERS</Text>
+              <View style={styles.signatureLine} />
+              <Text style={styles.signatureCaption}>Authorised Signature</Text>
+            </View>
           </View>
         </View>
 
-        <Text style={styles.footer}>Diners Fire Engineers - Fire Safety Certificate</Text>
+        <PdfFooterBar />
       </Page>
     </Document>
   );
