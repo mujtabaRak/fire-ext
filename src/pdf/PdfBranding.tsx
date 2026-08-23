@@ -1,5 +1,15 @@
-import { Svg, Path, Polygon, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Svg, Path, Polygon, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
+
+Font.register({
+  family: "Abril Fatface",
+  src: "https://cdn.jsdelivr.net/fontsource/fonts/abril-fatface@latest/latin-400-normal.ttf",
+});
+
+Font.register({
+  family: "Poppins-Bold",
+  src: "https://cdn.jsdelivr.net/fontsource/fonts/poppins@latest/latin-700-normal.ttf",
+});
 
 export const BRAND = {
   red: "#dc2626",
@@ -72,11 +82,11 @@ const watermarkStyles = StyleSheet.create({
   },
   group: { alignItems: "center" },
   dfe: {
-    marginTop: 6,
-    fontSize: 60,
+    marginTop: 4,
+    fontSize: 46,
     fontWeight: 700,
     color: BRAND.green,
-    opacity: 0.07,
+    opacity: 0.1,
     letterSpacing: 4,
   },
 });
@@ -85,7 +95,7 @@ export function PdfWatermark() {
   return (
     <View style={watermarkStyles.wrap} fixed>
       <View style={watermarkStyles.group}>
-        <FlameMark size={90} color={BRAND.red} opacity={0.07} />
+        <FlameMark size={110} color={BRAND.red} opacity={0.1} />
         <Text style={watermarkStyles.dfe}>DFE</Text>
       </View>
     </View>
@@ -97,17 +107,16 @@ const headerStyles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   nameBlock: { alignItems: "flex-start" },
   companyName: {
-    fontSize: 19,
-    fontWeight: 700,
-    fontFamily: "Times-Bold",
+    fontSize: 40.1,
+    fontFamily: "Abril Fatface",
     color: BRAND.green,
-    lineHeight: 1.05,
+    lineHeight: 1.15,
   },
   tagline: {
     fontSize: 8,
     color: BRAND.pink,
     letterSpacing: 2,
-    marginTop: 3,
+    marginTop: 10,
     fontWeight: 700,
   },
   docTitle: {
@@ -129,20 +138,20 @@ export function PdfLetterheadHeader({
   docTitle,
   docSubtitle,
 }: {
-  docTitle: string;
+  docTitle?: string;
   docSubtitle?: string;
 }) {
   return (
     <View style={headerStyles.wrap}>
       <View style={headerStyles.row}>
-        <FlameMark size={38} />
+        <FlameMark size={72} />
         <View style={headerStyles.nameBlock}>
           <Text style={headerStyles.companyName}>DINERS FIRE</Text>
           <Text style={headerStyles.companyName}>ENGINEERS</Text>
           <Text style={headerStyles.tagline}>{COMPANY_TAGLINE}</Text>
         </View>
       </View>
-      <Text style={headerStyles.docTitle}>{docTitle}</Text>
+      {docTitle && <Text style={headerStyles.docTitle}>{docTitle}</Text>}
       {docSubtitle && <Text style={headerStyles.docSubtitle}>{docSubtitle}</Text>}
     </View>
   );

@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import {
+  BRAND,
   PAGE_BORDER,
   PdfLetterheadHeader,
   PdfWatermark,
@@ -32,13 +33,31 @@ const styles = StyleSheet.create({
 
   topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   meta: { fontSize: 8, color: "#a3a3a3" },
-  reportNo: { fontSize: 9, color: "#525252", marginTop: 4, textDecoration: "underline" },
+  dateBold: { fontSize: 11, fontWeight: 700 },
 
-  dateRow: { marginTop: 14, marginBottom: 14, textAlign: "right" },
-  label: { fontWeight: 700 },
+  certTitleBlock: { alignItems: "center", marginBottom: 4 },
+  certTitle: {
+    fontFamily: "Times-Bold",
+    fontSize: 32,
+    color: BRAND.black,
+    textAlign: "center",
+    textDecoration: "underline",
+  },
+  reportNo: { fontSize: 9, color: "#737373", marginTop: 4, textAlign: "center" },
 
-  clientBlock: { marginBottom: 10 },
-  clientLabel: { fontWeight: 700, marginBottom: 4 },
+  clientBlock: { marginTop: 18, marginBottom: 14 },
+  clientName: {
+    fontFamily: "Poppins-Bold",
+    fontSize: 26,
+    color: "#171717",
+  },
+  address: {
+    fontFamily: "Poppins-Bold",
+    fontSize: 12,
+    color: "#171717",
+    textAlign: "center",
+    marginTop: 8,
+  },
 
   statement: { marginBottom: 12, color: "#262626", lineHeight: 1.4 },
 
@@ -83,21 +102,21 @@ export function CertificateDocument({ cert }: { cert: PdfCertificateData }) {
             <Text style={styles.meta}>Certificate No: {cert.certificateNumber}</Text>
           </View>
 
-          <PdfLetterheadHeader
-            docTitle="CERTIFICATE"
-            docSubtitle={`Report No. ${cert.certificateNumber}`}
-          />
+          <PdfLetterheadHeader />
 
-          <View style={styles.dateRow}>
-            <Text>
-              <Text style={styles.label}>Date: </Text>
-              {cert.certificateDate}
-            </Text>
+          <View style={styles.certTitleBlock}>
+            <Text style={styles.certTitle}>CERTIFICATE</Text>
+            <Text style={styles.reportNo}>Report No. {cert.certificateNumber}</Text>
+          </View>
+
+          <View style={styles.topRow}>
+            <View />
+            <Text style={styles.dateBold}>Date: {cert.certificateDate}</Text>
           </View>
 
           <View style={styles.clientBlock}>
-            <Text style={styles.clientLabel}>Client Name: {cert.clientName}</Text>
-            <Text>Address: {cert.clientAddress}</Text>
+            <Text style={styles.clientName}>CLIENT NAME: {cert.clientName}</Text>
+            <Text style={styles.address}>ADDRESS: {cert.clientAddress}</Text>
           </View>
 
           <Text style={styles.statement}>
