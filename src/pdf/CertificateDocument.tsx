@@ -50,16 +50,18 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Bold",
     fontSize: 26,
     color: "#171717",
+    textAlign: "center",
   },
   address: {
     fontFamily: "Poppins-Bold",
-    fontSize: 12,
+    fontSize: 16,
     color: "#171717",
     textAlign: "center",
     marginTop: 8,
   },
 
   statement: { marginBottom: 12, color: "#262626", lineHeight: 1.4 },
+  statementBold: { marginBottom: 12, color: "#171717", lineHeight: 1.4, fontWeight: 700 },
 
   table: { marginTop: 4, borderTop: "1px solid #171717" },
   tableHeader: {
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
   signatureBlock: { width: "45%", alignItems: "flex-start" },
   signatureFor: { marginBottom: 40, fontWeight: 700 },
   signatureLine: { borderTop: "1px solid #a3a3a3", width: "100%", marginBottom: 4 },
-  signatureCaption: { fontSize: 8, color: "#737373" },
+  signatureCaption: { fontSize: 8, color: "#737373", fontWeight: 700 },
 });
 
 export function CertificateDocument({ cert }: { cert: PdfCertificateData }) {
@@ -119,7 +121,7 @@ export function CertificateDocument({ cert }: { cert: PdfCertificateData }) {
             <Text style={styles.address}>ADDRESS: {cert.clientAddress}</Text>
           </View>
 
-          <Text style={styles.statement}>
+          <Text style={styles.statementBold}>
             This is certified that the under-noted fire extinguisher(s) have been supplied by us
             and are warranted for a period of {cert.warrantyPeriod} from the date of sale.
           </Text>
