@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { Plus, Trash2, ArrowLeft, RotateCcw, FileCheck } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, RotateCcw, FileCheck, Eye, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,11 +46,20 @@ function emptyItem(saleDate: string): ItemDraft {
   };
 }
 
+function openPdfBlob(blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
 export function AdminCertificatesPanel() {
   const [certificates, setCertificates] = useState<CertificateSummary[]>([]);
   const [products, setProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"list" | "form">("list");
+  const [editingCertificateNumber, setEditingCertificateNumber] = useState<string | null>(null);
+  const [loadingExisting, setLoadingExisting] = useState(false);
+  const [busyCertNumber, setBusyCertNumber] = useState<string | null>(null);
 
   const [clientName, setClientName] = useState("");
   const [clientAddress, setClientAddress] = useState("");
@@ -60,9 +69,11 @@ export function AdminCertificatesPanel() {
   const [items, setItems] = useState<ItemDraft[]>([emptyItem(todayIso())]);
 
   const [saving, setSaving] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
 
+  const isEditing = Boolean(editingCertificateNumber);
   const productNames = useMemo(() => products.map((p) => p.name), [products]);
 
   async function loadCertificates() {
@@ -96,7 +107,53 @@ export function AdminCertificatesPanel() {
 
   function startCreate() {
     resetForm();
+    setEditingCertificateNumber(null);
     setView("form");
+  }
+
+  function startEdit(certificateNumber: string) {
+    resetForm();
+    setEditingCertificateNumber(certificateNumber);
+    setView("form");
+    setLoadingExisting(true);
+    fetch(`/api/admin/certificates/${certificateNumber}`)
+      .then((r) => r.json())
+      .then((cert) => {
+        setClientName(cert.clientName ?? "");
+        setClientAddress(cert.clientAddress ?? "");
+        setSaleDate(cert.saleDate ? format(new Date(cert.saleDate), "yyyy-MM-dd") : todayIso());
+        setWarrantyPeriod(cert.warrantyPeriod ?? "One year");
+        setTestingNote(cert.testingNote ?? "");
+        setItems(
+          (cert.items ?? []).map(
+            (it: {
+              description: string;
+              yearOfManufacturing: number;
+              qty: number;
+              refillingDueDate: string;
+              cylinderSerialNo: string;
+            }) => ({
+              description: it.description,
+              yearOfManufacturing: String(it.yearOfManufacturing),
+              qty: String(it.qty),
+              refillingDueDate: format(new Date(it.refillingDueDate), "yyyy-MM-dd"),
+              cylinderSerialNo: it.cylinderSerialNo,
+            })
+          )
+        );
+      })
+      .finally(() => setLoadingExisting(false));
+  }
+
+  async function deleteCertificate(certificateNumber: string) {
+    if (!window.confirm(`Delete certificate ${certificateNumber}? This cannot be undone.`)) return;
+    setBusyCertNumber(certificateNumber);
+    try {
+      await fetch(`/api/admin/certificates/${certificateNumber}`, { method: "DELETE" });
+      await loadCertificates();
+    } finally {
+      setBusyCertNumber(null);
+    }
   }
 
   function updateItem(index: number, patch: Partial<ItemDraft>) {
@@ -130,6 +187,49 @@ export function AdminCertificatesPanel() {
     return null;
   }
 
+  function buildPayload() {
+    return {
+      clientName,
+      clientAddress,
+      saleDate,
+      warrantyPeriod,
+      testingNote: testingNote || undefined,
+      items: items.map((it) => ({
+        description: it.description,
+        yearOfManufacturing: Number(it.yearOfManufacturing),
+        qty: Number(it.qty),
+        refillingDueDate: it.refillingDueDate,
+        cylinderSerialNo: it.cylinderSerialNo,
+      })),
+    };
+  }
+
+  async function previewPdf() {
+    const validationError = findValidationError();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setError(null);
+    setPreviewLoading(true);
+    try {
+      const res = await fetch("/api/admin/certificates/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setError(json.error ?? "Could not build preview.");
+        return;
+      }
+      openPdfBlob(await res.blob());
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
   async function submit() {
     const validationError = findValidationError();
     if (validationError) {
@@ -140,29 +240,26 @@ export function AdminCertificatesPanel() {
     setError(null);
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/certificates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clientName,
-          clientAddress,
-          saleDate,
-          warrantyPeriod,
-          testingNote: testingNote || undefined,
-          items: items.map((it) => ({
-            description: it.description,
-            yearOfManufacturing: Number(it.yearOfManufacturing),
-            qty: Number(it.qty),
-            refillingDueDate: it.refillingDueDate,
-            cylinderSerialNo: it.cylinderSerialNo,
-          })),
-        }),
-      });
+      const res = await fetch(
+        isEditing ? `/api/admin/certificates/${editingCertificateNumber}` : "/api/admin/certificates",
+        {
+          method: isEditing ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildPayload()),
+        }
+      );
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error ?? "Could not generate certificate.");
+        setError(json.error ?? "Could not save certificate.");
         return;
       }
+
+      if (isEditing) {
+        await loadCertificates();
+        setView("list");
+        return;
+      }
+
       setResult(json.certificateNumber);
       await loadCertificates();
     } finally {
@@ -205,8 +302,12 @@ export function AdminCertificatesPanel() {
             <Button variant="ghost" size="icon" onClick={() => setView("list")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h3 className="font-semibold text-neutral-900">New Certificate</h3>
+            <h3 className="font-semibold text-neutral-900">
+              {isEditing ? `Edit Certificate: ${editingCertificateNumber}` : "New Certificate"}
+            </h3>
           </div>
+
+          {loadingExisting && <p className="text-sm text-neutral-500">Loading certificate…</p>}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -353,9 +454,20 @@ export function AdminCertificatesPanel() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button onClick={submit} disabled={saving}>
-            {saving ? "Generating…" : "Generate Certificate"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={submit} disabled={saving}>
+              {saving ? "Saving…" : isEditing ? "Save Changes" : "Generate Certificate"}
+            </Button>
+            <Button variant="outline" onClick={previewPdf} disabled={previewLoading}>
+              <Eye className="h-4 w-4" />
+              {previewLoading ? "Building preview…" : "Preview PDF"}
+            </Button>
+            {isEditing && (
+              <Button variant="ghost" onClick={() => setView("list")} disabled={saving}>
+                Cancel
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -385,16 +497,34 @@ export function AdminCertificatesPanel() {
                   {c.clientName} &middot; {c.itemCount} item{c.itemCount === 1 ? "" : "s"}
                 </p>
               </div>
-              <Button variant="outline" size="sm" asChild>
-                <a
-                  href={`/api/certificates/${c.certificateNumber}/pdf`}
-                  target="_blank"
-                  rel="noreferrer"
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <a
+                    href={`/api/certificates/${c.certificateNumber}/pdf`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FileCheck className="h-4 w-4" />
+                    PDF
+                  </a>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => startEdit(c.certificateNumber)}
                 >
-                  <FileCheck className="h-4 w-4" />
-                  PDF
-                </a>
-              </Button>
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => deleteCertificate(c.certificateNumber)}
+                  disabled={busyCertNumber === c.certificateNumber}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}

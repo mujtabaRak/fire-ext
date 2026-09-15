@@ -12,6 +12,7 @@ export type BillLineItemDto = {
 export type BillDetailsDto = {
   invoiceNumber: string;
   customerName: string;
+  customerPhone: string;
   billingAddress: string;
   shippingAddress: string;
   items: BillLineItemDto[];

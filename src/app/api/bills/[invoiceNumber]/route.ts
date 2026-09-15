@@ -16,6 +16,7 @@ export async function GET(
   return NextResponse.json({
     invoiceNumber: bill.invoiceNumber,
     customerName: bill.customerName,
+    customerPhone: bill.customerPhone,
     billingAddress: bill.billingAddress,
     shippingAddress: bill.shippingAddress,
     items: JSON.parse(bill.items),

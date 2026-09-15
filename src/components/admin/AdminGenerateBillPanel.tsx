@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, RotateCcw, AlertTriangle } from "lucide-react";
+import { format } from "date-fns";
+import { Plus, Trash2, RotateCcw, AlertTriangle, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,10 +20,26 @@ const emptyItem = (products: ProductDto[]): LineItemDraft => ({
   quantity: 1,
 });
 
-export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }) {
+function openPdfBlob(blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+export function AdminGenerateBillPanel({
+  editingInvoiceNumber,
+  onCreated,
+  onDone,
+}: {
+  editingInvoiceNumber?: string | null;
+  onCreated?: () => void;
+  onDone?: () => void;
+}) {
   const [products, setProducts] = useState<ProductDto[]>([]);
   const [productsLoaded, setProductsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [customerName, setCustomerName] = useState("");
@@ -40,15 +57,44 @@ export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }
     null
   );
 
+  const isEditing = Boolean(editingInvoiceNumber);
+
   useEffect(() => {
     fetch("/api/products")
       .then((r) => r.json())
       .then((data: ProductDto[]) => {
         setProducts(data);
-        setItems(data.length > 0 ? [emptyItem(data)] : []);
         setProductsLoaded(true);
       });
   }, []);
+
+  useEffect(() => {
+    if (!editingInvoiceNumber) return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading an existing bill to prefill the edit form
+    setLoadingExisting(true);
+    setError(null);
+    fetch(`/api/bills/${editingInvoiceNumber}`)
+      .then((r) => r.json())
+      .then((bill) => {
+        setCustomerName(bill.customerName ?? "");
+        setCustomerPhone(bill.customerPhone ?? "");
+        setBillingAddress(bill.billingAddress ?? "");
+        setShippingAddress(bill.shippingAddress ?? "");
+        setSameAsBilling(bill.shippingAddress === bill.billingAddress);
+        setItems(
+          (bill.items ?? []).map((it: { productId: string; quantity: number }) => ({
+            productId: it.productId,
+            quantity: it.quantity,
+          }))
+        );
+        setTaxRate(bill.taxRate ?? 0);
+        setDiscount(bill.discount ?? 0);
+        setDueDate(bill.dueDate ? format(new Date(bill.dueDate), "yyyy-MM-dd") : "");
+        setNotes(bill.notes ?? "");
+      })
+      .finally(() => setLoadingExisting(false));
+  }, [editingInvoiceNumber]);
 
   const productMap = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
@@ -96,28 +142,61 @@ export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }
     setError(null);
   }
 
+  function buildPayload() {
+    return {
+      customerName,
+      customerPhone,
+      billingAddress,
+      shippingAddress: sameAsBilling ? billingAddress : shippingAddress,
+      items,
+      taxRate,
+      discount,
+      dueDate: dueDate || undefined,
+      notes: notes || undefined,
+    };
+  }
+
+  async function previewPdf() {
+    setError(null);
+    setPreviewLoading(true);
+    try {
+      const res = await fetch("/api/admin/bills/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setError(json.error ?? "Could not build preview.");
+        return;
+      }
+      openPdfBlob(await res.blob());
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
   async function submitBill() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/bills", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName,
-          customerPhone,
-          billingAddress,
-          shippingAddress: sameAsBilling ? billingAddress : shippingAddress,
-          items,
-          taxRate,
-          discount,
-          dueDate: dueDate || undefined,
-          notes: notes || undefined,
-        }),
-      });
+      const res = await fetch(
+        isEditing ? `/api/admin/bills/${editingInvoiceNumber}` : "/api/bills",
+        {
+          method: isEditing ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildPayload()),
+        }
+      );
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error ?? "Could not generate bill.");
+        setError(json.error ?? "Could not save bill.");
+        return;
+      }
+
+      if (isEditing) {
+        onCreated?.();
+        onDone?.();
         return;
       }
 
@@ -163,7 +242,11 @@ export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }
   return (
     <Card>
       <CardContent className="space-y-6 p-6">
-        <h3 className="font-semibold text-neutral-900">New Bill</h3>
+        <h3 className="font-semibold text-neutral-900">
+          {isEditing ? `Edit Bill: ${editingInvoiceNumber}` : "New Bill"}
+        </h3>
+
+        {loadingExisting && <p className="text-sm text-neutral-500">Loading bill…</p>}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -283,20 +366,31 @@ export function AdminGenerateBillPanel({ onCreated }: { onCreated?: () => void }
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <Button
-          onClick={submitBill}
-          disabled={
-            loading ||
-            !customerName ||
-            !customerPhone ||
-            !billingAddress ||
-            (!sameAsBilling && !shippingAddress) ||
-            items.length === 0 ||
-            items.some((item) => !item.productId)
-          }
-        >
-          {loading ? "Generating…" : "Generate Bill"}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={submitBill}
+            disabled={
+              loading ||
+              !customerName ||
+              !customerPhone ||
+              !billingAddress ||
+              (!sameAsBilling && !shippingAddress) ||
+              items.length === 0 ||
+              items.some((item) => !item.productId)
+            }
+          >
+            {loading ? "Saving…" : isEditing ? "Save Changes" : "Generate Bill"}
+          </Button>
+          <Button variant="outline" onClick={previewPdf} disabled={previewLoading || items.length === 0}>
+            <Eye className="h-4 w-4" />
+            {previewLoading ? "Building preview…" : "Preview PDF"}
+          </Button>
+          {isEditing && (
+            <Button variant="ghost" onClick={onDone} disabled={loading}>
+              Cancel
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

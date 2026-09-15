@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, LogOut } from "lucide-react";
+import { CheckCircle2, LogOut, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ export default function AdminPage() {
   const [bills, setBills] = useState<AdminBill[]>([]);
   const [busyInvoice, setBusyInvoice] = useState<string | null>(null);
   const [tab, setTab] = useState("bills");
+  const [editingInvoiceNumber, setEditingInvoiceNumber] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/session")
@@ -86,6 +87,22 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ invoiceNumber }),
       });
+      await loadBills();
+    } finally {
+      setBusyInvoice(null);
+    }
+  }
+
+  function editBill(invoiceNumber: string) {
+    setEditingInvoiceNumber(invoiceNumber);
+    setTab("new");
+  }
+
+  async function deleteBill(invoiceNumber: string) {
+    if (!window.confirm(`Delete bill ${invoiceNumber}? This cannot be undone.`)) return;
+    setBusyInvoice(invoiceNumber);
+    try {
+      await fetch(`/api/admin/bills/${invoiceNumber}`, { method: "DELETE" });
       await loadBills();
     } finally {
       setBusyInvoice(null);
@@ -142,7 +159,9 @@ export default function AdminPage() {
         <Tabs value={tab} onValueChange={setTab} className="mt-6">
           <TabsList>
             <TabsTrigger value="bills">Bills</TabsTrigger>
-            <TabsTrigger value="new">New Bill</TabsTrigger>
+            <TabsTrigger value="new" onClick={() => setEditingInvoiceNumber(null)}>
+              New Bill
+            </TabsTrigger>
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
           </TabsList>
@@ -172,6 +191,14 @@ export default function AdminPage() {
                           PDF
                         </a>
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => editBill(b.invoiceNumber)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        Edit
+                      </Button>
                       {b.paymentStatus !== "paid" && (
                         <Button
                           size="sm"
@@ -182,6 +209,14 @@ export default function AdminPage() {
                           Mark Paid
                         </Button>
                       )}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteBill(b.invoiceNumber)}
+                        disabled={busyInvoice === b.invoiceNumber}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -192,8 +227,13 @@ export default function AdminPage() {
 
           <TabsContent value="new">
             <AdminGenerateBillPanel
+              editingInvoiceNumber={editingInvoiceNumber}
               onCreated={() => {
                 loadBills();
+              }}
+              onDone={() => {
+                setEditingInvoiceNumber(null);
+                setTab("bills");
               }}
             />
           </TabsContent>
