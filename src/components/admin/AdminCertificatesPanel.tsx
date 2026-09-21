@@ -64,6 +64,7 @@ export function AdminCertificatesPanel() {
   const [clientName, setClientName] = useState("");
   const [clientAddress, setClientAddress] = useState("");
   const [saleDate, setSaleDate] = useState(todayIso());
+  const [certificateDate, setCertificateDate] = useState(todayIso());
   const [warrantyPeriod, setWarrantyPeriod] = useState("One year");
   const [testingNote, setTestingNote] = useState("");
   const [items, setItems] = useState<ItemDraft[]>([emptyItem(todayIso())]);
@@ -98,6 +99,7 @@ export function AdminCertificatesPanel() {
     setClientName("");
     setClientAddress("");
     setSaleDate(todayIso());
+    setCertificateDate(todayIso());
     setWarrantyPeriod("One year");
     setTestingNote("");
     setItems([emptyItem(todayIso())]);
@@ -122,6 +124,9 @@ export function AdminCertificatesPanel() {
         setClientName(cert.clientName ?? "");
         setClientAddress(cert.clientAddress ?? "");
         setSaleDate(cert.saleDate ? format(new Date(cert.saleDate), "yyyy-MM-dd") : todayIso());
+        setCertificateDate(
+          cert.certificateDate ? format(new Date(cert.certificateDate), "yyyy-MM-dd") : todayIso()
+        );
         setWarrantyPeriod(cert.warrantyPeriod ?? "One year");
         setTestingNote(cert.testingNote ?? "");
         setItems(
@@ -172,6 +177,7 @@ export function AdminCertificatesPanel() {
     if (clientName.trim().length < 2) return "Enter the client name.";
     if (clientAddress.trim().length < 5) return "Enter the client address.";
     if (!saleDate) return "Enter the sale/supply date.";
+    if (!certificateDate) return "Enter the certificate date.";
     if (items.length === 0) return "Add at least one item.";
     for (let i = 0; i < items.length; i++) {
       const it = items[i];
@@ -192,6 +198,7 @@ export function AdminCertificatesPanel() {
       clientName,
       clientAddress,
       saleDate,
+      certificateDate,
       warrantyPeriod,
       testingNote: testingNote || undefined,
       items: items.map((it) => ({
@@ -329,6 +336,21 @@ export function AdminCertificatesPanel() {
                 onChange={(e) => setSaleDate(e.target.value)}
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="c-certdate">Certificate Date</Label>
+            <Input
+              id="c-certdate"
+              type="date"
+              className="mt-2 max-w-xs"
+              value={certificateDate}
+              onChange={(e) => setCertificateDate(e.target.value)}
+            />
+            <p className="mt-1 text-xs text-neutral-400">
+              The date printed at the top of the certificate — set this to any date, past or
+              future. Separate from the sale/supply date above.
+            </p>
           </div>
 
           <div>

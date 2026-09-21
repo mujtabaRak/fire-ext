@@ -26,6 +26,10 @@ function openPdfBlob(blob: Blob) {
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
+function todayIso(): string {
+  return format(new Date(), "yyyy-MM-dd");
+}
+
 export function AdminGenerateBillPanel({
   editingInvoiceNumber,
   onCreated,
@@ -50,6 +54,7 @@ export function AdminGenerateBillPanel({
   const [items, setItems] = useState<LineItemDraft[]>([]);
   const [taxRate, setTaxRate] = useState(0);
   const [discount, setDiscount] = useState(0);
+  const [invoiceDate, setInvoiceDate] = useState(todayIso());
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -90,6 +95,7 @@ export function AdminGenerateBillPanel({
         );
         setTaxRate(bill.taxRate ?? 0);
         setDiscount(bill.discount ?? 0);
+        setInvoiceDate(bill.invoiceDate ? format(new Date(bill.invoiceDate), "yyyy-MM-dd") : todayIso());
         setDueDate(bill.dueDate ? format(new Date(bill.dueDate), "yyyy-MM-dd") : "");
         setNotes(bill.notes ?? "");
       })
@@ -136,6 +142,7 @@ export function AdminGenerateBillPanel({
     setItems([emptyItem(products)]);
     setTaxRate(0);
     setDiscount(0);
+    setInvoiceDate(todayIso());
     setDueDate("");
     setNotes("");
     setResult(null);
@@ -151,6 +158,7 @@ export function AdminGenerateBillPanel({
       items,
       taxRate,
       discount,
+      invoiceDate: invoiceDate || undefined,
       dueDate: dueDate || undefined,
       notes: notes || undefined,
     };
@@ -337,7 +345,27 @@ export function AdminGenerateBillPanel({
           </Button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="invoiceDate">Bill Date</Label>
+            <Input
+              id="invoiceDate"
+              type="date"
+              className="mt-2"
+              value={invoiceDate}
+              onChange={(e) => setInvoiceDate(e.target.value)}
+            />
+            <p className="mt-1 text-xs text-neutral-400">
+              Set this to any date, past or future — it&apos;s what prints on the bill.
+            </p>
+          </div>
+          <div>
+            <Label htmlFor="dueDate">Due Date</Label>
+            <Input id="dueDate" type="date" className="mt-2" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="taxRate">Tax Rate (%)</Label>
             <Input id="taxRate" type="number" min={0} max={100} className="mt-2" value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value) || 0)} />
@@ -345,10 +373,6 @@ export function AdminGenerateBillPanel({
           <div>
             <Label htmlFor="discount">Discount (₹)</Label>
             <Input id="discount" type="number" min={0} className="mt-2" value={discount} onChange={(e) => setDiscount(Number(e.target.value) || 0)} />
-          </div>
-          <div>
-            <Label htmlFor="dueDate">Due Date</Label>
-            <Input id="dueDate" type="date" className="mt-2" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
           </div>
         </div>
 
@@ -374,6 +398,7 @@ export function AdminGenerateBillPanel({
               !customerName ||
               !customerPhone ||
               !billingAddress ||
+              !invoiceDate ||
               (!sameAsBilling && !shippingAddress) ||
               items.length === 0 ||
               items.some((item) => !item.productId)

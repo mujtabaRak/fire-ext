@@ -50,6 +50,7 @@ export async function POST(request: Request) {
           clientName: data.clientName,
           clientAddress: data.clientAddress,
           saleDate: new Date(data.saleDate),
+          certificateDate: data.certificateDate ? new Date(data.certificateDate) : new Date(),
           warrantyPeriod: data.warrantyPeriod,
           testingNote: data.testingNote,
           items: JSON.stringify(data.items),

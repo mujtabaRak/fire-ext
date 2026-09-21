@@ -64,6 +64,7 @@ export async function PATCH(
         subtotal,
         total,
         notes: data.notes,
+        ...(data.invoiceDate && { invoiceDate: new Date(data.invoiceDate) }),
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
       },
     });

@@ -26,7 +26,10 @@ export async function POST(request: Request) {
     <CertificateDocument
       cert={{
         certificateNumber: "PREVIEW — NOT SAVED",
-        certificateDate: format(new Date(), "dd/MM/yyyy"),
+        certificateDate: format(
+          data.certificateDate ? new Date(data.certificateDate) : new Date(),
+          "dd/MM/yyyy"
+        ),
         clientName: data.clientName,
         clientAddress: data.clientAddress,
         saleDate: format(new Date(data.saleDate), "dd/MM/yyyy"),

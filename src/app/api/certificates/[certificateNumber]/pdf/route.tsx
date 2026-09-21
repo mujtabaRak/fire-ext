@@ -35,7 +35,7 @@ export async function GET(
     <CertificateDocument
       cert={{
         certificateNumber: cert.certificateNumber,
-        certificateDate: format(cert.createdAt, "dd/MM/yyyy"),
+        certificateDate: format(cert.certificateDate, "dd/MM/yyyy"),
         clientName: cert.clientName,
         clientAddress: cert.clientAddress,
         saleDate: format(cert.saleDate, "dd/MM/yyyy"),

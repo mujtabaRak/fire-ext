@@ -16,6 +16,7 @@ export const generateBillSchema = z.object({
   items: z.array(billItemSchema).min(1, "Add at least one line item"),
   taxRate: z.coerce.number().min(0).max(100).default(0),
   discount: z.coerce.number().min(0).default(0),
+  invoiceDate: z.string().optional(),
   dueDate: z.string().optional(),
   notes: z.string().trim().max(1000).optional(),
 });
@@ -69,6 +70,7 @@ export const generateCertificateSchema = z.object({
   clientName: z.string().trim().min(2).max(200),
   clientAddress: z.string().trim().min(5).max(500),
   saleDate: z.string().min(1, "Sale date is required"),
+  certificateDate: z.string().optional(),
   warrantyPeriod: z.string().trim().min(1).max(100).default("One year"),
   testingNote: z.string().trim().max(1000).optional(),
   items: z.array(certificateItemSchema).min(1, "Add at least one item"),

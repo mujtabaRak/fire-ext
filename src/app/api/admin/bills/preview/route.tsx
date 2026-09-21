@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     <BillDocument
       bill={{
         invoiceNumber: "PREVIEW — NOT SAVED",
-        invoiceDate: format(new Date(), "dd MMM yyyy"),
+        invoiceDate: format(data.invoiceDate ? new Date(data.invoiceDate) : new Date(), "dd MMM yyyy"),
         dueDate: data.dueDate ? format(new Date(data.dueDate), "dd MMM yyyy") : null,
         customerName: data.customerName,
         customerPhone: data.customerPhone,

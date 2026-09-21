@@ -52,6 +52,7 @@ model Certificate {
   clientName        String
   clientAddress     String
   saleDate          DateTime
+  certificateDate   DateTime @default(now())
   warrantyPeriod    String   @default("One year")
   testingNote       String?
   items             String

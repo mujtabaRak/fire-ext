@@ -64,6 +64,7 @@ export async function POST(request: Request) {
           subtotal,
           total,
           notes: data.notes,
+          invoiceDate: data.invoiceDate ? new Date(data.invoiceDate) : new Date(),
           dueDate: data.dueDate ? new Date(data.dueDate) : null,
         },
       });

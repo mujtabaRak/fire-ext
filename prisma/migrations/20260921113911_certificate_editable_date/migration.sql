@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Certificate" ADD COLUMN     "certificateDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
